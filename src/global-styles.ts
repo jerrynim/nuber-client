@@ -19,5 +19,6 @@ const GlobalStyle = createGlobalStyle`
       &:focus,
       &:active{outline:none}
   }
+  
 `;
 export default GlobalStyle;

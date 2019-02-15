@@ -2,6 +2,7 @@ import * as styledComponents from "styled-components";
 
 interface IThemeInterface {
   blueColor: string;
+  greyColor: string;
 }
 
 const {

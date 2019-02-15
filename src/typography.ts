@@ -13,7 +13,7 @@ const typography = new Typography({
       styles: ["400"]
     }
   ],
-  headerFontFamily: ["Nunito", "Helvetica", "sans-serif"],
+  headerFontFamily: ["Maven Pro", "sans-serif"],
   includeNormalize: false
 });
 
