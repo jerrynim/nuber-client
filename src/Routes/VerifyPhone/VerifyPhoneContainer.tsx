@@ -34,11 +34,22 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
         {(logUserIn) => (
           <VerifyMutation
             mutation={VERIFY_PHONE}
-            variables={{ key: verificationKey, phoneNumber }}
+            variables={{
+              key: verificationKey,
+              phoneNumber
+            }}
             onCompleted={(data) => {
               const { CompletePhoneVerification } = data;
               if (CompletePhoneVerification.ok) {
-                toast.success("You're verified,loggin in now");
+                if (CompletePhoneVerification.token) {
+                  console.log(CompletePhoneVerification.token);
+                  logUserIn({
+                    variables: {
+                      token: CompletePhoneVerification.token
+                    }
+                  });
+                }
+                toast.success("You're verified, loggin in now");
               } else {
                 toast.error(CompletePhoneVerification.error);
               }
@@ -46,9 +57,9 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
           >
             {(mutation, { loading }) => (
               <VerifyPhonePresenter
+                onSubmit={mutation}
                 onChange={this.onInputChange}
                 verificationKey={verificationKey}
-                onSubmit={mutation}
                 loading={loading}
               />
             )}
