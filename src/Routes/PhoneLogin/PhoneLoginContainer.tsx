@@ -2,6 +2,10 @@ import React from "react";
 import { Mutation } from "react-apollo";
 import { RouteComponentProps } from "react-router";
 import { toast } from "react-toastify";
+import {
+  startPhoneVerification,
+  startPhoneVerificationVariables
+} from "../../types/api";
 import PhoneLoginPresenter from "./PhoneLoginPresenter";
 import { PHONE_SIGN_IN } from "./PhoneQueries.queries";
 
@@ -10,11 +14,10 @@ interface IState {
   phoneNumber: string;
 }
 
-interface IMutationIneterface {
-  phoneNumber: string;
-}
-
-class PhoneSignInMutation extends Mutation<any, IMutationIneterface> {}
+class PhoneSignInMutation extends Mutation<
+  startPhoneVerification,
+  startPhoneVerificationVariables
+> {}
 /* Mutation<data,variables> data는 Mutation 리턴하는값 ok,error,etc...  */
 
 class PhoneLoginContainer extends React.Component<
@@ -27,6 +30,7 @@ class PhoneLoginContainer extends React.Component<
   };
 
   public render() {
+    const { history } = this.props;
     const { countryCode, phoneNumber } = this.state;
     return (
       <PhoneSignInMutation
@@ -34,13 +38,29 @@ class PhoneLoginContainer extends React.Component<
         variables={{
           phoneNumber: `${countryCode}${phoneNumber}`
         }}
+        onCompleted={(data) => {
+          const { StartPhoneVerification } = data;
+          const phone = `${countryCode}${phoneNumber}`;
+          if (StartPhoneVerification.ok) {
+            toast.success("SMS sent! Redirecting you");
+            setTimeout(() => {
+              history.push({
+                pathname: "/verify-phone",
+                state: {
+                  phone
+                }
+              });
+            }, 2000);
+          } else {
+            toast.error(StartPhoneVerification.error);
+          }
+        }}
       >
         {(mutation, { loading }) => {
           const onSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
             event.preventDefault();
-            const isValid = /^\+[1-9]{1}[0-9]{7,11}$/.test(
-              `${countryCode}${phoneNumber}`
-            );
+            const phone = `${countryCode}${phoneNumber}`;
+            const isValid = /^\+[1-9]{1}[0-9]{7,11}$/.test(phone);
             if (isValid) {
               mutation();
             } else {

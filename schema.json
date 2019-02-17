@@ -2419,9 +2419,13 @@
               }
             ],
             "type": {
-              "kind": "OBJECT",
-              "name": "StartPhoneVerificationResponse",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "StartPhoneVerificationResponse",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

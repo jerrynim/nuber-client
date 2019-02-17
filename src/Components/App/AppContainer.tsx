@@ -1,6 +1,7 @@
 import React from "react";
 import { graphql } from "react-apollo";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.min.css";
 import theme from "../../theme";
 import { ThemeProvider } from "../../typed-components";
 import AppPresenter from "./AppPresenter";

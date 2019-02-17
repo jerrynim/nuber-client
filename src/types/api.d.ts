@@ -12,7 +12,7 @@ export interface startPhoneVerification_StartPhoneVerification {
 }
 
 export interface startPhoneVerification {
-  StartPhoneVerification: startPhoneVerification_StartPhoneVerification | null;
+  StartPhoneVerification: startPhoneVerification_StartPhoneVerification;
 }
 
 export interface startPhoneVerificationVariables {
