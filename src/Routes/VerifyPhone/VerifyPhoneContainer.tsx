@@ -1,13 +1,16 @@
 import React from "react";
 import { Mutation } from "react-apollo";
 import { RouteComponentProps } from "react-router-dom";
+import { toast } from "react-toastify";
+import { LOG_USER_IN } from "../../sharedQueries.queries";
 import { verifyPhone, verifyPhoneVariables } from "../../types/api";
 import VerifyPhonePresenter from "./VerifyPhonePresenter";
 import { VERIFY_PHONE } from "./VerifyPhoneQueries.queries";
+
 interface IProps extends RouteComponentProps<any> {}
 
 interface IState {
-  key: string;
+  verificationKey: string;
   phoneNumber: string;
 }
 
@@ -20,19 +23,38 @@ class VerifyPhoneContainer extends React.Component<IProps, IState> {
       props.history.push("/");
     }
     this.state = {
-      key: "",
-      phoneNumber: props.location.state.phone
+      phoneNumber: props.location.state.phone,
+      verificationKey: ""
     };
   }
   public render() {
-    const { key, phoneNumber } = this.state;
-
+    const { verificationKey, phoneNumber } = this.state;
     return (
-      <VerifyMutation variables={{ key, phoneNumber }} mutation={VERIFY_PHONE}>
-        {(mutation, { loading }) => (
-          <VerifyPhonePresenter onChange={this.onInputChange} key={key} />
+      <Mutation mutation={LOG_USER_IN}>
+        {(logUserIn) => (
+          <VerifyMutation
+            mutation={VERIFY_PHONE}
+            variables={{ key: verificationKey, phoneNumber }}
+            onCompleted={(data) => {
+              const { CompletePhoneVerification } = data;
+              if (CompletePhoneVerification.ok) {
+                toast.success("You're verified,loggin in now");
+              } else {
+                toast.error(CompletePhoneVerification.error);
+              }
+            }}
+          >
+            {(mutation, { loading }) => (
+              <VerifyPhonePresenter
+                onChange={this.onInputChange}
+                verificationKey={verificationKey}
+                onSubmit={mutation}
+                loading={loading}
+              />
+            )}
+          </VerifyMutation>
         )}
-      </VerifyMutation>
+      </Mutation>
     );
   }
 
