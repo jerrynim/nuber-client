@@ -17,6 +17,7 @@ const Title = styled.h2`
 const Link = styled.span`
   display: flex;
   align-items: center;
+  cursor: pointer;
 `;
 
 const Icon = styled.span`
@@ -33,7 +34,7 @@ interface IProps {
   loginCallback: (response) => void;
 }
 
-const SocialLoginPresenter: React.SFC<IProps> = (loginCallback) => (
+const SocialLoginPresenter: React.SFC<IProps> = ({ loginCallback }) => (
   <Container>
     <Helmet>
       <title>Social Login | Nuber</title>
@@ -43,10 +44,10 @@ const SocialLoginPresenter: React.SFC<IProps> = (loginCallback) => (
     <FacebookLogin
       appId="736201003429834"
       autoLoad={false}
-      fields="first_name,last_name,email"
+      fields="name,first_name,last_name,email"
       callback={loginCallback}
       render={(renderProps) => (
-        <Link>
+        <Link onClick={renderProps.onClick}>
           <Icon>
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,6 @@
 import React from "react";
 import { RouteComponentProps } from "react-router";
+
 import HomePresenter from "./HomePresenter";
 
 interface IState {
@@ -18,6 +19,7 @@ class HomeContainer extends React.Component<IProps, IState> {
       <HomePresenter isMenuOpen={isMenuOpen} toggleMenu={this.toggleMenu} />
     );
   }
+
   public toggleMenu = () => {
     this.setState((state) => {
       return {
