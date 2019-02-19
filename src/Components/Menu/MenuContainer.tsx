@@ -16,6 +16,8 @@ class MenuContainer extends React.Component {
       <ToggleDrivingMutation
         mutation={TOGGLE_DRIVING}
         update={(cache, { data }) => {
+          /* data는 ToggleDrivingResponse ok,error
+          API접근없이 cache를 통한 방식 */
           if (data) {
             const { ToggleDrivingMode } = data;
             if (!ToggleDrivingMode.ok) {
