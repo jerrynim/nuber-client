@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { reverseGeoCode } from "../../mapHelpers";
+import { RouteComponentProps } from "react-router";
+import { geoCode, reverseGeoCode } from "../../mapHelpers";
 import FindAddressPresenter from "./FindAddressPresenter";
 
 interface IState {
@@ -9,7 +10,11 @@ interface IState {
   address: string;
 }
 
-class FindAddressContainer extends React.Component<any, IState> {
+interface IProps extends RouteComponentProps<any> {
+  google: any;
+}
+
+class FindAddressContainer extends React.Component<IProps, IState> {
   public state = {
     address: "",
     lat: 0,
@@ -35,6 +40,7 @@ class FindAddressContainer extends React.Component<any, IState> {
         address={address}
         onInputChange={this.onInputChange}
         onInputBlur={this.onInputBlur}
+        onPickPlace={this.onPickPlace}
       />
     );
   }
@@ -61,12 +67,13 @@ class FindAddressContainer extends React.Component<any, IState> {
         lng
       },
       disableDefaultUI: true,
+      minZoom: 8,
       zoom: 11
     };
     this.map = new maps.Map(mapNode, mapConfig);
     this.map.addListener("dragend", this.handleDragEnd);
   };
-  public handleDragEnd = () => {
+  public handleDragEnd = async () => {
     const newCenter = this.map.getCenter();
     const lat = newCenter.lat();
     const lng = newCenter.lng();
@@ -74,7 +81,7 @@ class FindAddressContainer extends React.Component<any, IState> {
       lat,
       lng
     });
-    reverseGeoCode(lat, lng);
+    this.reversedGeocodeAddress(lat, lng);
   };
 
   public onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,8 +92,39 @@ class FindAddressContainer extends React.Component<any, IState> {
       [name]: value
     } as any);
   };
-  public onInputBlur = () => {
-    console.log("Address updated");
+  public onInputBlur = async () => {
+    const { address } = this.state;
+    const result = await geoCode(address);
+    if (result !== false) {
+      const { lat, lng, formatted_address: formattedAddress } = result;
+      this.setState({
+        address: formattedAddress,
+        lat,
+        lng
+      });
+      this.map.panTo({ lat, lng });
+    }
+  };
+  public reversedGeocodeAddress = async (lat: number, lng: number) => {
+    const reversedAddress = await reverseGeoCode(lat, lng);
+    if (reversedAddress !== false) {
+      this.setState({
+        address: reversedAddress
+      });
+    }
+  };
+  public onPickPlace = () => {
+    const { address, lat, lng } = this.state;
+    const { history } = this.props;
+    history.push({
+      pathname: "/add-place",
+      state: {
+        address,
+        lat,
+        lng
+      }
+    });
+    console.log(address, lat, lng);
   };
 }
 

@@ -31,7 +31,7 @@ class PlaceContainer extends React.Component<IProps> {
           <PlacePresenter
             onStarPress={editPlaceFn}
             fav={fav}
-            name={name}
+            name={placeName}
             address={address}
           />
         )}
