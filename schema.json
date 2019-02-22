@@ -1797,7 +1797,7 @@
             "description": "",
             "args": [
               {
-                "name": "placeId",
+                "name": "id",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
