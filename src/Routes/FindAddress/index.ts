@@ -1,5 +1,6 @@
 import { GoogleApiWrapper } from "google-maps-react";
+import { MAPS_KEY } from "../../keys";
 import FindAdressContainer from "./FindAddressContainer";
 export default GoogleApiWrapper({
-  apiKey: "AIzaSyDPV8zIGN5ekVFjkJLpqoo3CNt1HJlNCH0"
+  apiKey: MAPS_KEY
 })(FindAdressContainer);
