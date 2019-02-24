@@ -2,6 +2,7 @@ import React from "react";
 import { Query } from "react-apollo";
 import ReactDOM from "react-dom";
 import { RouteComponentProps } from "react-router";
+import { toast } from "react-toastify";
 import { geoCode } from "../../mapHelpers";
 import { USER_PROFILE } from "../../sharedQueries.queries";
 import { userProfile } from "../../types/api";
@@ -14,6 +15,9 @@ interface IState {
   toAddress: string;
   toLat: number;
   toLng: number;
+  distance?: string;
+  duration?: string;
+  price?: number;
 }
 
 interface IProps extends RouteComponentProps<any> {
@@ -27,7 +31,10 @@ class HomeContainer extends React.Component<IProps, IState> {
   public map: google.maps.Map;
   public userMarker: google.maps.Marker;
   public toMarker: google.maps.Marker;
+  public directions: google.maps.DirectionsRenderer;
   public state = {
+    distance: "",
+    duration: "",
     isMenuOpen: false,
     lat: 0,
     lng: 0,
@@ -166,14 +173,77 @@ class HomeContainer extends React.Component<IProps, IState> {
       this.toMarker.setMap(this.map);
       const bounds = new maps.LatLngBounds();
       bounds.extend({ lat, lng });
+      /*목적지 확장 */
       bounds.extend({ lat: this.state.lat, lng: this.state.lng });
+      /*유저의 위치 확장 */
       this.map.fitBounds(bounds);
-      this.setState({
-        toAddress: formatedAddress,
-        toLat: lat,
-        toLng: lng
-      });
+      this.setState(
+        {
+          toAddress: formatedAddress,
+          toLat: lat,
+          toLng: lng
+        },
+        this.createPath
+      );
     }
+  };
+
+  public createPath = () => {
+    const { toLat, toLng, lat, lng } = this.state;
+    if (this.directions) {
+      this.directions.setMap(null);
+    }
+    const renderOptions: google.maps.DirectionsRendererOptions = {
+      polylineOptions: {
+        strokeColor: "#000"
+      },
+      suppressMarkers: true
+    };
+    this.directions = new google.maps.DirectionsRenderer(renderOptions);
+    const directionService: google.maps.DirectionsService = new google.maps.DirectionsService();
+    const to = new google.maps.LatLng(toLat, toLng);
+    const from = new google.maps.LatLng(lat, lng);
+    const directionsOptions: google.maps.DirectionsRequest = {
+      destination: to,
+      origin: from,
+      travelMode: google.maps.TravelMode.TRANSIT
+    };
+    directionService.route(directionsOptions, (result, status) => {
+      /*
+        OK 
+        {geocoded_waypoints: Array(2), routes: Array(1), status: "OK", request: {…}}
+        geocoded_waypoints: (2) [{…}, {…}]
+        request: {destination: {…}, origin: {…}, travelMode: "TRANSIT"}
+        routes: Array(1)
+        0:
+        bounds: _.R {ma: od, ga: kd}
+        copyrights: "Map data ©2019 SK telecom"
+        legs: Array(1)
+        0:
+        arrival_time: {text: "10:03pm", time_zone: "Asia/Seoul", value: Sun Feb 24 2019 22:03:08 GMT+0900 (한국 표준시)}
+        departure_time: {text: "9:18pm", time_zone: "Asia/Seoul", value: Sun Feb 24 2019 21:18:00 GMT+0900 (한국 표준시)}
+        distance: {text: "14.1 km", value: 14070}
+        duration: {text: "45 mins", value: 2708}
+        end_address: "90, Pilun-dong, Jongno-gu, 서울특별시 South Korea"
+        end_location: _.Q {lat: ƒ, lng: ƒ}
+        start_address: "629-2 Gongneung-dong, Nowon-gu, Seoul, South Korea"
+      */
+      if (status === google.maps.DirectionsStatus.OK) {
+        const { routes } = result;
+        const {
+          distance: { text: distance },
+          duration: { text: duration }
+        } = routes[0].legs[0];
+        this.setState({
+          distance,
+          duration
+        });
+        this.directions.setDirections(result);
+        this.directions.setMap(this.map);
+      } else {
+        toast.error("Therie is no route");
+      }
+    });
   };
 }
 
