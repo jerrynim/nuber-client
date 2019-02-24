@@ -17,7 +17,7 @@ interface IState {
   toLng: number;
   distance?: string;
   duration?: string;
-  price?: number;
+  price?: string;
 }
 
 interface IProps extends RouteComponentProps<any> {
@@ -38,6 +38,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     isMenuOpen: false,
     lat: 0,
     lng: 0,
+    price: "",
     toAddress: "",
     toLat: 0,
     toLng: 0
@@ -113,7 +114,7 @@ class HomeContainer extends React.Component<IProps, IState> {
   };
 
   public render() {
-    const { isMenuOpen, toAddress } = this.state;
+    const { isMenuOpen, toAddress, price } = this.state;
     return (
       <ProfileQuery query={USER_PROFILE}>
         {({ loading }) => (
@@ -123,6 +124,7 @@ class HomeContainer extends React.Component<IProps, IState> {
             mapRef={this.mapRef}
             loading={loading}
             toAddress={toAddress}
+            price={price}
             onInputChange={this.onInputChange}
             onAddressSubmit={this.onAddressSubmit}
           />
@@ -208,8 +210,30 @@ class HomeContainer extends React.Component<IProps, IState> {
       origin: from,
       travelMode: google.maps.TravelMode.TRANSIT
     };
-    directionService.route(directionsOptions, (result, status) => {
-      /*
+    directionService.route(directionsOptions, this.handleRouteRequest);
+  };
+
+  public handleRouteRequest = (
+    result: google.maps.DirectionsResult,
+    status: google.maps.DirectionsStatus
+  ) => {
+    if (status === google.maps.DirectionsStatus.OK) {
+      const { routes } = result;
+      const {
+        distance: { text: distance },
+        duration: { text: duration }
+      } = routes[0].legs[0];
+      this.setState({
+        distance,
+        duration
+      });
+      this.directions.setDirections(result);
+      this.directions.setMap(this.map);
+    } else {
+      toast.error("Therie is no route");
+    }
+
+    /*
         OK 
         {geocoded_waypoints: Array(2), routes: Array(1), status: "OK", request: {…}}
         geocoded_waypoints: (2) [{…}, {…}]
@@ -228,22 +252,15 @@ class HomeContainer extends React.Component<IProps, IState> {
         end_location: _.Q {lat: ƒ, lng: ƒ}
         start_address: "629-2 Gongneung-dong, Nowon-gu, Seoul, South Korea"
       */
-      if (status === google.maps.DirectionsStatus.OK) {
-        const { routes } = result;
-        const {
-          distance: { text: distance },
-          duration: { text: duration }
-        } = routes[0].legs[0];
-        this.setState({
-          distance,
-          duration
-        });
-        this.directions.setDirections(result);
-        this.directions.setMap(this.map);
-      } else {
-        toast.error("Therie is no route");
-      }
-    });
+  };
+
+  public setPrice = () => {
+    const { distance } = this.state;
+    if (distance) {
+      this.setState({
+        price: Number(parseFloat(distance.replace(",", "")) * 3).toFixed(2)
+      });
+    }
   };
 }
 
