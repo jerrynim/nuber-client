@@ -44,17 +44,17 @@ class FindAddressContainer extends React.Component<IProps, IState> {
       />
     );
   }
-  public handleGeoSucces = (positon: Position) => {
+  public handleGeoSucces: PositionCallback = (position: Position) => {
     const {
       coords: { latitude, longitude }
-    } = positon;
+    } = position;
     this.setState({
       lat: latitude,
       lng: longitude
     });
     this.loadMap(latitude, longitude);
   };
-  public handleGeoError = () => {
+  public handleGeoError: PositionErrorCallback = () => {
     console.log("No location");
   };
   public loadMap = (lat, lng) => {
