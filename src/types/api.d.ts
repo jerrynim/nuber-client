@@ -1,4 +1,5 @@
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -16,6 +17,7 @@ export interface toggleDriving {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -39,6 +41,7 @@ export interface editPlaceVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -64,6 +67,7 @@ export interface addPlaceVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -88,6 +92,7 @@ export interface updateProfileVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -109,6 +114,7 @@ export interface reportMovementVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -133,6 +139,78 @@ export interface getDrivers {
 }
 
 /* tslint:disable */
+/* eslint-disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: requestRide
+// ====================================================
+
+export interface requestRide_RequestRide_ride {
+  __typename: "Ride";
+  id: number;
+}
+
+export interface requestRide_RequestRide {
+  __typename: "RequestRideResponse";
+  ok: boolean;
+  error: string | null;
+  ride: requestRide_RequestRide_ride | null;
+}
+
+export interface requestRide {
+  RequestRide: requestRide_RequestRide;
+}
+
+export interface requestRideVariables {
+  pickUpAddress: string;
+  pickUpLat: number;
+  pickUpLng: number;
+  dropOffAddress: string;
+  dropOffLat: number;
+  dropOffLng: number;
+  price: number;
+  distance: string;
+  duration: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: getRides
+// ====================================================
+
+export interface getRides_GetNearbyRide_ride_passenger {
+  __typename: "User";
+  fullName: string | null;
+  profilePhoto: string | null;
+}
+
+export interface getRides_GetNearbyRide_ride {
+  __typename: "Ride";
+  id: number;
+  pickUpAddress: string;
+  dropOffAddress: string;
+  price: number;
+  distance: string;
+  passenger: getRides_GetNearbyRide_ride_passenger;
+}
+
+export interface getRides_GetNearbyRide {
+  __typename: "GetNearbyRideResponse";
+  ok: boolean;
+  error: string | null;
+  ride: getRides_GetNearbyRide_ride | null;
+}
+
+export interface getRides {
+  GetNearbyRide: getRides_GetNearbyRide;
+}
+
+/* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -154,6 +232,7 @@ export interface startPhoneVerificationVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -179,6 +258,7 @@ export interface facebookConnectVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -202,6 +282,7 @@ export interface verifyPhoneVariables {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -230,6 +311,7 @@ export interface userProfile {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 // ====================================================
@@ -256,6 +338,7 @@ export interface getPlaces {
 }
 
 /* tslint:disable */
+/* eslint-disable */
 // This file was automatically generated and should not be edited.
 
 //==============================================================

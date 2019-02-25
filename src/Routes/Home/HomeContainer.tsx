@@ -1,18 +1,19 @@
 import React from "react";
-import { graphql, MutationFn, Query } from "react-apollo";
+import { graphql, Mutation, MutationFn, Query } from "react-apollo";
 import ReactDOM from "react-dom";
 import { RouteComponentProps } from "react-router";
 import { toast } from "react-toastify";
 import { geoCode } from "../../mapHelpers";
 import { USER_PROFILE } from "../../sharedQueries.queries";
 import {
-  getDrivers,
   reportMovement,
   reportMovementVariables,
+  requestRide,
+  requestRideVariables,
   userProfile
 } from "../../types/api";
 import HomePresenter from "./HomePresenter";
-import { GET_NEARBY_DRIVERS, REPORT_LOCATION } from "./HomeQueries.queries";
+import { REPORT_LOCATION, REQUEST_RIDE } from "./HomeQueries.queries";
 
 interface IState {
   isMenuOpen: boolean;
@@ -23,7 +24,8 @@ interface IState {
   toLng: number;
   distance?: string;
   duration?: string;
-  price?: string;
+  price?: number;
+  fromAddress: string;
 }
 
 interface IProps extends RouteComponentProps<any> {
@@ -31,9 +33,9 @@ interface IProps extends RouteComponentProps<any> {
   reportLocation: MutationFn;
 }
 
-class ProfileQuery extends Query<userProfile> {}
+class RequsetRideMutation extends Mutation<requestRide, requestRideVariables> {}
 
-class NearbyQuery extends Query<getDrivers> {}
+class ProfileQuery extends Query<userProfile> {}
 
 class HomeContainer extends React.Component<IProps, IState> {
   public mapRef: any;
@@ -41,14 +43,14 @@ class HomeContainer extends React.Component<IProps, IState> {
   public userMarker: google.maps.Marker;
   public toMarker: google.maps.Marker;
   public directions: google.maps.DirectionsRenderer;
-  public drivers: google.maps.Marker[];
   public state = {
     distance: "",
     duration: "",
+    fromAddress: "",
     isMenuOpen: false,
     lat: 0,
     lng: 0,
-    price: "",
+    price: 0,
     toAddress: "",
     toLat: 0,
     toLng: 0
@@ -132,23 +134,36 @@ class HomeContainer extends React.Component<IProps, IState> {
   };
 
   public render() {
-    const { isMenuOpen, toAddress, price } = this.state;
+    const {
+      isMenuOpen,
+      toAddress,
+      price,
+      distance,
+      fromAddress,
+      lat,
+      lng,
+      toLat,
+      toLng,
+      duration
+    } = this.state;
     return (
       <ProfileQuery query={USER_PROFILE}>
         {({ data, loading }) => (
-          <NearbyQuery
-            query={GET_NEARBY_DRIVERS}
-            pollInterval={1000}
-            skip={
-              (data &&
-                data.GetMyProfile &&
-                data.GetMyProfile.user &&
-                data.GetMyProfile.user.isDriving) ||
-              false
-            }
-            onCompleted={this.handleNearbyDrivers}
+          <RequsetRideMutation
+            mutation={REQUEST_RIDE}
+            variables={{
+              distance,
+              dropOffAddress: toAddress,
+              dropOffLat: toLat,
+              dropOffLng: toLng,
+              duration: duration || "",
+              pickUpAddress: fromAddress,
+              pickUpLat: lat,
+              pickUpLng: lng,
+              price
+            }}
           >
-            {() => (
+            {(requestRideFn) => (
               <HomePresenter
                 isMenuOpen={isMenuOpen}
                 toggleMenu={this.toggleMenu}
@@ -158,10 +173,10 @@ class HomeContainer extends React.Component<IProps, IState> {
                 price={price}
                 onInputChange={this.onInputChange}
                 onAddressSubmit={this.onAddressSubmit}
-                data={data}
+                requestRideFn={requestRideFn}
               />
             )}
-          </NearbyQuery>
+          </RequsetRideMutation>
         )}
       </ProfileQuery>
     );
@@ -295,54 +310,10 @@ class HomeContainer extends React.Component<IProps, IState> {
     const { distance } = this.state;
     if (distance) {
       this.setState({
-        price: Number(parseFloat(distance.replace(",", "")) * 3).toFixed(2)
+        price: Number(
+          Number(parseFloat(distance.replace(",", "")) * 3).toFixed(2)
+        )
       });
-    }
-  };
-
-  public handleNearbyDrivers = (data) => {
-    if (data && data.GetNearbyDrivers) {
-      const {
-        GetNearbyDrivers: { drivers, ok }
-      } = data;
-      if (ok && drivers) {
-        for (const driver of drivers) {
-          if (driver && driver.lastLat && driver.lastLng) {
-            const exisitingDriver:
-              | google.maps.Marker
-              | undefined = this.drivers.find(
-              (driverMarker: google.maps.Marker) => {
-                const markerID = driverMarker.get("ID");
-                return markerID === driver.id;
-              }
-            );
-            if (exisitingDriver) {
-              exisitingDriver.setPosition({
-                lat: driver.lastLat,
-                lng: driver.lastLng
-              });
-              exisitingDriver.setMap(this.map);
-            } else {
-              const markerOptions: google.maps.MarkerOptions = {
-                icon: {
-                  path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                  scale: 5
-                },
-                position: {
-                  lat: driver.lastLat,
-                  lng: driver.lastLng
-                }
-              };
-              const newMarker: google.maps.Marker = new google.maps.Marker(
-                markerOptions
-              );
-              this.drivers.push(newMarker);
-              newMarker.set("ID", driver.id);
-              newMarker.setMap(this.map);
-            }
-          }
-        }
-      }
     }
   };
 }
