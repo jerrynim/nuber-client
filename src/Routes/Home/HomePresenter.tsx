@@ -5,7 +5,9 @@ import Sidebar from "react-sidebar";
 import AddressBar from "../../Components/AddressBar";
 import Button from "../../Components/Button";
 import Menu from "../../Components/Menu";
+import RidePopUp from "../../Components/RidePopUp";
 import styled from "../../typed-components";
+import { getRides, userProfile } from "../../types/api";
 
 const Container = styled.div``;
 
@@ -55,7 +57,10 @@ interface IProps {
   onAddressSubmit: () => void;
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   price: number;
-  requestRideFn: MutationFn;
+  requestRideFn?: MutationFn;
+  acceptRideFn?: MutationFn;
+  data?: userProfile;
+  nearbyRide?: getRides;
 }
 
 const HomePresenter: React.SFC<IProps> = ({
@@ -67,46 +72,130 @@ const HomePresenter: React.SFC<IProps> = ({
   onInputChange,
   onAddressSubmit,
   price,
-  requestRideFn
-}) => (
-  <Container>
-    <Helmet>
-      <title>Home | Number</title>
-    </Helmet>
-    <Sidebar
-      sidebar={<Menu />}
-      open={isMenuOpen}
-      onSetOpen={toggleMenu}
-      styles={{
-        sidebar: {
-          backgroundColor: "white",
-          width: "80%",
-          zIndex: "10"
-        }
-      }}
-    >
-      {!loading && <MenuButton onClick={toggleMenu}>|||</MenuButton>}
-      <AddressBar
-        name={"toAddress"}
-        onChange={onInputChange}
-        value={toAddress}
-        onBlur={null}
-      />
-      {price && (
-        <RequestButton
-          onClick={requestRideFn}
-          disabled={toAddress === ""}
-          value={`Request Ride ($${price})`}
-        />
-      )}
-      <ExtendedButton
-        onClick={onAddressSubmit}
-        disabled={toAddress === ""}
-        value={price ? "Change address" : "Pick Address"}
-      />
-      <Map ref={mapRef} />
-    </Sidebar>
-  </Container>
-);
+  data,
+  acceptRideFn,
+  nearbyRide
+}) => {
+  if (
+    data &&
+    data.GetMyProfile &&
+    data.GetMyProfile.ok &&
+    data.GetMyProfile.user
+  ) {
+    if (
+      nearbyRide &&
+      nearbyRide.GetNearbyRide &&
+      nearbyRide.GetNearbyRide.ok &&
+      nearbyRide.GetNearbyRide.ride
+    ) {
+      const ride = nearbyRide.GetNearbyRide.ride;
+      const user = data.GetMyProfile.user;
+      return (
+        <Container>
+          <Helmet>
+            <title>Home | Nuber</title>
+          </Helmet>
+          <Sidebar
+            sidebar={<Menu />}
+            open={isMenuOpen}
+            onSetOpen={toggleMenu}
+            styles={{
+              sidebar: {
+                backgroundColor: "white",
+                width: "80%",
+                zIndex: "10"
+              }
+            }}
+          >
+            {!loading && <MenuButton onClick={toggleMenu}>|||</MenuButton>}
+            {user && !user.isDriving && (
+              <React.Fragment>
+                <AddressBar
+                  name={"toAddress"}
+                  onChange={onInputChange}
+                  value={toAddress}
+                  onBlur={null}
+                />
+                <ExtendedButton
+                  onClick={onAddressSubmit}
+                  disabled={toAddress === ""}
+                  value={price ? "Change address" : "Pick Address"}
+                />
+              </React.Fragment>
+            )}
+            {price && (
+              <RequestButton
+                onClick={onAddressSubmit}
+                disabled={toAddress === ""}
+                value={`Request Ride ($${price})`}
+              />
+            )}
+            {ride && (
+              <RidePopUp
+                id={ride.id}
+                pickUpAddress={ride.pickUpAddress}
+                dropOffAddress={ride.dropOffAddress}
+                price={ride.price}
+                distance={ride.distance}
+                passengerName={ride.passenger.fullName!}
+                passengerPhoto={ride.passenger.profilePhoto!}
+                acceptRideFn={acceptRideFn}
+              />
+            )}
+            <Map ref={mapRef} />
+          </Sidebar>
+        </Container>
+      );
+    } else {
+      const user = data.GetMyProfile.user;
+      return (
+        <Container>
+          <Helmet>
+            <title>Home | Nuber</title>
+          </Helmet>
+          <Sidebar
+            sidebar={<Menu />}
+            open={isMenuOpen}
+            onSetOpen={toggleMenu}
+            styles={{
+              sidebar: {
+                backgroundColor: "white",
+                width: "80%",
+                zIndex: "10"
+              }
+            }}
+          >
+            {!loading && <MenuButton onClick={toggleMenu}>|||</MenuButton>}
+            {user && !user.isDriving && (
+              <React.Fragment>
+                <AddressBar
+                  name={"toAddress"}
+                  onChange={onInputChange}
+                  value={toAddress}
+                  onBlur={null}
+                />
+                <ExtendedButton
+                  onClick={onAddressSubmit}
+                  disabled={toAddress === ""}
+                  value={price ? "Change address" : "Pick Address"}
+                />
+              </React.Fragment>
+            )}
+            {price && (
+              <RequestButton
+                onClick={onAddressSubmit}
+                disabled={toAddress === ""}
+                value={`Request Ride ($${price})`}
+              />
+            )}
+            <Map ref={mapRef} />
+          </Sidebar>
+        </Container>
+      );
+    }
+  } else {
+    return <div>can't get user</div>;
+  }
+};
 
 export default HomePresenter;
