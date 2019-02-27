@@ -74,7 +74,8 @@ const HomePresenter: React.SFC<IProps> = ({
   price,
   data,
   acceptRideFn,
-  nearbyRide
+  nearbyRide,
+  requestRideFn
 }) => {
   if (
     data &&
@@ -93,7 +94,7 @@ const HomePresenter: React.SFC<IProps> = ({
       return (
         <Container>
           <Helmet>
-            <title>Home | Nuber</title>
+            <title>Home | Number</title>
           </Helmet>
           <Sidebar
             sidebar={<Menu />}
@@ -125,7 +126,7 @@ const HomePresenter: React.SFC<IProps> = ({
             )}
             {price && (
               <RequestButton
-                onClick={onAddressSubmit}
+                onClick={requestRideFn}
                 disabled={toAddress === ""}
                 value={`Request Ride ($${price})`}
               />
