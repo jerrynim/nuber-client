@@ -37,10 +37,7 @@ class RideContainer extends React.Component<IProps> {
           <RideQuery query={GET_RIDE} variables={{ rideId }}>
             {({ data, loading }) => {
               return (
-                <RideUpdate
-                  mutation={UPDATE_RIDE_STATUS}
-                  refetchQueries={GET_RIDE}
-                >
+                <RideUpdate mutation={UPDATE_RIDE_STATUS}>
                   {(updateRideFn) => (
                     <RidePresenter
                       userData={userData}
